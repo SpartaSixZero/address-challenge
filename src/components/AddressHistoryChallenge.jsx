@@ -1,63 +1,68 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AddressList from './AddressList';
 import AddressEventList from './AddressEventList';
 
-class AddressHistoryChallenge extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      userId: "",
-      currentView: "addressList",
-      addresses: [],
-      addressEvents: []
-    };
-  }
+const AddressHistoryChallenge = () => {
 
-   fetchButtonOnClick = () => {
-    fetch(`http://localhost:5000/users/${this.state.userId}/addresses`)
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({addresses: result})
-        }
-      )
+  const [userId, setUserId] = useState('');
+  const [currentView, setCurrentView] = useState('addressList');
+  const [addresses, setAddresses] = useState([]);
+  const [addressEvents, setAddressEvents] = useState([]);
+
+  const fetchButtonOnClick = () => {
+  fetch(`http://localhost:5000/users/${userId}/addresses`)
+    .then(res => res.json())
+    .then(
+      (result) => {
+        setAddresses(result)
+      }
+    )
   } 
 
-  userIdInputOnChange = (event) => {
-    this.setState({userId: event.target.value});
+  const userIdInputOnChange = (event) => {
+    console.log('It go into this method');
+    console.log('event is', event);
+    console.log('event.target.value is', event.target.value);
+    setUserId(event.target.value);
   }
 
-  backButtonOnClick = () => {
-    this.setState({currentView: 'addressList'});
-    this.setState({addressEvents: []});
+  const backButtonOnClick = () => {
+    setCurrentView('addressList');
+    setAddressEvents([]);
   }
 
-  addressOnClick = (addressId) => {
+  const addressOnClick = (addressId) => {
     fetch(`http://localhost:5000/addresses/${addressId}/events`)
     .then(res => res.json())
     .then(
       (result) => {
-        this.setState({addressEvents: result})
+        setAddressEvents(result)
       }
     )
 
-    this.setState({currentView: 'addressEventsList'});
+    setCurrentView('addressEventsList');
   }
 
-  render() {
-    if (this.state.currentView === 'addressList') {
+  const renderAddressHistoryChallenge = () => {
+    if (currentView === 'addressList') {
       return (
         <div>
           <p>Please enter a user id</p>
-          <input onChange={this.userIdInputOnChange} value={this.state.userId}></input>
-          <button onClick={this.fetchButtonOnClick}>Fetch</button>
-          <AddressList addresses={this.state.addresses} addressOnClick={this.addressOnClick}/>
+          <input onChange={userIdInputOnChange} value={userId}></input>
+          <button onClick={fetchButtonOnClick}>Fetch</button>
+          <AddressList addresses={addresses} addressOnClick={addressOnClick}/>
         </div>
       )
-    } else {
-      return <AddressEventList addressEvents={this.state.addressEvents} backButtonOnClick={this.backButtonOnClick}/>;
+     } else {
+      return <AddressEventList addressEvents={addressEvents} backButtonOnClick={backButtonOnClick}/>;
     }
   }
+
+  return (
+    <div>
+      {renderAddressHistoryChallenge()}
+    </div>
+  )
 }
 
 export default AddressHistoryChallenge;
